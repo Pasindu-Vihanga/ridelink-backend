@@ -1,39 +1,44 @@
 package com.ridelink.account_service.entity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GenerationType;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "users")
+import java.time.LocalDateTime;
+
+@Document(collection = "users")
 @Getter
 @Setter
-@NoArgsConstructor 
-@AllArgsConstructor 
-@Builder 
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
-    @Id 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+    @Id
+    private String id;
 
     private String fullName;
 
-    @Column (unique = true)
+    @Indexed(unique = true)
     private String email;
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    private String phoneNumber;
+
     private Role role;
 
+    @Builder.Default
+    private AccountStatus status = AccountStatus.ACTIVE;
 
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }

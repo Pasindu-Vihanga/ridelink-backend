@@ -1,7 +1,7 @@
 package com.ridelink.account_service.dto;
 
 import com.ridelink.account_service.entity.AccountStatus;
-import com.ridelink.account_service.entity.Role;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,22 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginResponse {
+public class UpdateStatusRequest {
 
-    private String token;
-
-    @Builder.Default
-    private String tokenType = "Bearer";
-
-    private long expiresIn;
-
-    private String userId;
-
-    private String email;
-
-    private String fullName;
-
-    private Role role;
-
+    @NotNull(message = "Status is required (ACTIVE, SUSPENDED, DEACTIVATED)")
     private AccountStatus status;
 }
