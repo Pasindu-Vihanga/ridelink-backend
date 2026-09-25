@@ -1,0 +1,327 @@
+{
+  "info": {
+    "_postman_id": "d4e5f6a7-b8c9-7d8e-1f2a-3b4c5d6e7f8a",
+    "name": "RideLink - Fare & Payment Service API",
+    "description": "Postman collection for RideLink Fare & Payment Service demonstrating fare estimation, simulated payment recording, digital receipts, and error handling for IT3130.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Fare Estimation (Documented Rules)",
+      "item": [
+        {
+          "name": "Estimate Fare for Specific Vehicle (CAR)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickupAddress\": \"Colombo Fort\",\n  \"dropoffAddress\": \"Majestic City, Bambalapitiya\",\n  \"distanceKm\": 5.8,\n  \"estimatedDurationMinutes\": 18.0,\n  \"vehicleType\": \"CAR\"\n}"
+            },
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/fares/estimate",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "fares", "estimate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns estimate for CAR\", function () {",
+                  "    pm.expect(jsonData[0].vehicleType).to.eql('CAR');",
+                  "    pm.expect(jsonData[0].estimatedFare).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Estimate Fare for All Vehicle Types",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickupAddress\": \"Colombo Fort\",\n  \"dropoffAddress\": \"Majestic City, Bambalapitiya\",\n  \"distanceKm\": 5.8\n}"
+            },
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/fares/estimate",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "fares", "estimate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returns array with 4 vehicle types\", function () {",
+                  "    pm.expect(pm.response.json().length).to.eql(4);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Payment Processing & Digital Receipts",
+      "item": [
+        {
+          "name": "Process Payment (Positive)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{rideId}}\",\n  \"passengerId\": \"{{passengerId}}\",\n  \"paymentMethod\": \"CARD\",\n  \"actualDistanceKm\": 5.8,\n  \"actualDurationMinutes\": 18.0,\n  \"simulateFailure\": false\n}"
+            },
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/process",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "process"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"paymentId\", jsonData.id);",
+                  "}",
+                  "pm.test(\"Payment status is COMPLETED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql('COMPLETED');",
+                  "});",
+                  "pm.test(\"Receipt number generated\", function () {",
+                  "    pm.expect(jsonData.receiptNumber).to.not.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Payment by Payment ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/{{paymentId}}",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Digital Receipt by Payment ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/{{paymentId}}/receipt",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "receipt"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Contains itemized charges\", function () {",
+                  "    pm.expect(jsonData.baseFare).to.not.be.null;",
+                  "    pm.expect(jsonData.distanceCharge).to.not.be.null;",
+                  "    pm.expect(jsonData.totalAmount).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Digital Receipt by Ride ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/ride/{{rideId}}/receipt",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "ride", "{{rideId}}", "receipt"]
+            }
+          }
+        },
+        {
+          "name": "Get Passenger Payment History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/passenger/{{passengerId}}",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "passenger", "{{passengerId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Negative Scenarios",
+      "item": [
+        {
+          "name": "Negative 1: Missing Required Fields (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"\",\n  \"passengerId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/process",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "process"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative 2: Duplicate Payment Attempt (409 Conflict)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{rideId}}\",\n  \"passengerId\": \"{{passengerId}}\",\n  \"paymentMethod\": \"CARD\",\n  \"actualDistanceKm\": 5.8,\n  \"actualDurationMinutes\": 18.0\n}"
+            },
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/process",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "process"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test(\"Error is Duplicate Payment\", function () {",
+                  "    pm.expect(pm.response.json().error).to.include('Duplicate Payment');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative 3: Simulated Payment Failure (402 Payment Required)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{secondRideId}}\",\n  \"passengerId\": \"{{passengerId}}\",\n  \"paymentMethod\": \"CARD\",\n  \"actualDistanceKm\": 5.8,\n  \"simulateFailure\": true\n}"
+            },
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/process",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "process"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 402 Payment Required\", function () {",
+                  "    pm.response.to.have.status(402);",
+                  "});",
+                  "pm.test(\"Error is Payment Failed\", function () {",
+                  "    pm.expect(pm.response.json().error).to.include('Payment Failed');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative 4: Get Non-Existent Payment (404 Not Found)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{fareBaseUrl}}/api/payments/nonexistent-payment-999",
+              "host": ["{{fareBaseUrl}}"],
+              "path": ["api", "payments", "nonexistent-payment-999"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
