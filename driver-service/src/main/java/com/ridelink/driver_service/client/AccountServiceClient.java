@@ -13,13 +13,11 @@ import org.springframework.web.client.RestClient;
 public class AccountServiceClient {
 
     private final RestClient restClient;
-    private final String accountServiceUrl;
 
     public AccountServiceClient(
             RestClient.Builder restClientBuilder,
             @Value("${services.account-service.url:http://localhost:8081}") String accountServiceUrl
     ) {
-        this.accountServiceUrl = accountServiceUrl;
         this.restClient = restClientBuilder.baseUrl(accountServiceUrl).build();
     }
 
