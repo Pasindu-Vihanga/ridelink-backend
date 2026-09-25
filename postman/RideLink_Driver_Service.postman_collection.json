@@ -1,0 +1,420 @@
+{
+  "info": {
+    "_postman_id": "b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6e",
+    "name": "RideLink - Driver & Vehicle Service API",
+    "description": "Postman collection for RideLink Driver & Vehicle Service demonstrating functional workflows including interservice communication with Account Service, for IT3130.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Driver Profile & Vehicle Registration",
+      "item": [
+        {
+          "name": "Register Driver Profile (Positive)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{driverId}}\",\n  \"driverName\": \"Sunil Silva\",\n  \"phoneNumber\": \"+94719876543\",\n  \"licenseNumber\": \"DL-2026-SL-001\",\n  \"experienceYears\": 5,\n  \"vehicleMake\": \"Toyota\",\n  \"vehicleModel\": \"Corolla\",\n  \"vehicleYear\": 2022,\n  \"licensePlate\": \"CAB-1234\",\n  \"vehicleType\": \"CAR\",\n  \"vehicleCapacity\": 4,\n  \"latitude\": 6.9271,\n  \"longitude\": 79.8612,\n  \"serviceArea\": \"Colombo\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"driverProfileId\", jsonData.id);",
+                  "}",
+                  "pm.test(\"Status is OFFLINE on registration\", function () {",
+                  "    pm.expect(jsonData.status).to.eql('OFFLINE');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Driver by Driver ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Driver by Account User ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/user/{{driverId}}",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "user", "{{driverId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Vehicle Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Honda\",\n  \"model\": \"Civic\",\n  \"year\": 2023,\n  \"licensePlate\": \"CAB-9999\",\n  \"vehicleType\": \"CAR\",\n  \"capacity\": 4\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}/vehicle",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}", "vehicle"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Availability & Location Management",
+      "item": [
+        {
+          "name": "Set Status ONLINE",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ONLINE\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}/availability",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}", "availability"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Driver is ONLINE\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql('ONLINE');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Set Status OFFLINE",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"OFFLINE\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}/availability",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}", "availability"]
+            }
+          }
+        },
+        {
+          "name": "Update Location & Service Area",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 7.2906,\n  \"longitude\": 80.6337,\n  \"serviceArea\": \"Kandy\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}/location",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}", "location"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Service area is Kandy\", function () {",
+                  "    pm.expect(pm.response.json().location.serviceArea).to.eql('Kandy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Available Driver Search (Interservice Endpoint)",
+      "item": [
+        {
+          "name": "Get All Available ONLINE Drivers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/available",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "available"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returns an array\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Available Drivers - Filter by Service Area",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/available?serviceArea=Colombo",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "available"],
+              "query": [{ "key": "serviceArea", "value": "Colombo" }]
+            }
+          }
+        },
+        {
+          "name": "Get Available Drivers - Filter by Service Area and Vehicle Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/available?serviceArea=Colombo&vehicleType=CAR",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "available"],
+              "query": [
+                { "key": "serviceArea", "value": "Colombo" },
+                { "key": "vehicleType", "value": "CAR" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Trip Status - Mark ON_TRIP (By Ride Service)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"onTrip\": true\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}/trip-status",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}", "trip-status"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Driver is ON_TRIP\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql('ON_TRIP');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Trip Status - Mark ONLINE after trip completes",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"onTrip\": false\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/{{driverProfileId}}/trip-status",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "{{driverProfileId}}", "trip-status"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Driver is ONLINE and totalTrips incremented\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('ONLINE');",
+                  "    pm.expect(json.totalTrips).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Negative Scenarios",
+      "item": [
+        {
+          "name": "Negative 1: Register with Missing Fields (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"\",\n  \"driverName\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative 2: Duplicate Driver Registration (409 Conflict)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{jwtToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{driverId}}\",\n  \"driverName\": \"Sunil Silva\",\n  \"phoneNumber\": \"+94719876543\",\n  \"licenseNumber\": \"DL-2026-SL-001\",\n  \"experienceYears\": 5,\n  \"vehicleMake\": \"Toyota\",\n  \"vehicleModel\": \"Corolla\",\n  \"vehicleYear\": 2022,\n  \"licensePlate\": \"CAB-1234\",\n  \"vehicleType\": \"CAR\",\n  \"vehicleCapacity\": 4,\n  \"latitude\": 6.9271,\n  \"longitude\": 79.8612,\n  \"serviceArea\": \"Colombo\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Negative 3: Get Non-Existent Driver (404 Not Found)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{driverBaseUrl}}/api/drivers/nonexistent-id-xyz",
+              "host": ["{{driverBaseUrl}}"],
+              "path": ["api", "drivers", "nonexistent-id-xyz"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
