@@ -14,7 +14,9 @@ The **Account Service** is one of the four core microservices for the RideLink r
 
 ## 2. Technology Stack & Persistence Boundary
 - **Framework**: Spring Boot 4.0.8 (Java 21)
-- **Database**: MongoDB (`mongodb://localhost:27017/ridelink_account_db`)
+- **Database**: MongoDB (`ridelink_account_db`)
+  - **Local**: `mongodb://localhost:27017/ridelink_account_db`
+  - **MongoDB Atlas Cloud**: Supported via `ACCOUNT_MONGODB_URI` or `MONGODB_ATLAS_URI` environment variable
 - **Security**: Spring Security 6+ & JJWT (0.12.6)
 - **API Documentation**: OpenAPI 3 / Swagger UI (`springdoc-openapi-starter-webmvc-ui`)
 - **Testing**: JUnit 5, Mockito, Spring MockMvc
@@ -24,7 +26,18 @@ The **Account Service** is one of the four core microservices for the RideLink r
 ## 3. Configuration & Startup
 ### Prerequisites
 - Java 21 JDK
-- MongoDB running on `localhost:27017`
+- MongoDB running on `localhost:27017` or MongoDB Atlas Cloud connection string
+
+### MongoDB Atlas Configuration
+To connect to MongoDB Atlas cloud database:
+```bash
+# Option A: Set single cluster URI (database name is automatically routed)
+export MONGODB_ATLAS_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+
+# Option B: Set dedicated service database URI
+export ACCOUNT_MONGODB_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/ridelink_account_db?retryWrites=true&w=majority"
+```
+*(On Windows PowerShell, use `$env:MONGODB_ATLAS_URI="..."`)*
 
 ### Running the Service
 ```bash

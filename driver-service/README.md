@@ -15,6 +15,8 @@ The **Driver & Vehicle Service** is the second core microservice for the RideLin
 ## 2. Tech Stack & Persistence Boundary
 - **Framework**: Spring Boot 4.0.8 (Java 21)
 - **Database**: MongoDB (`ridelink_driver_db`) — independent from Account Service
+  - **Local**: `mongodb://localhost:27017/ridelink_driver_db`
+  - **MongoDB Atlas Cloud**: Supported via `DRIVER_MONGODB_URI` or `MONGODB_ATLAS_URI`
 - **Security**: JWT validation (shared secret with Account Service cluster)
 - **Interservice**: Spring `RestClient` → Account Service (`http://localhost:8081`)
 - **Documentation**: OpenAPI 3 / Swagger UI
@@ -23,8 +25,17 @@ The **Driver & Vehicle Service** is the second core microservice for the RideLin
 
 ## 3. Configuration & Startup
 ### Prerequisites
-- Java 21 JDK, MongoDB on `localhost:27017`
+- Java 21 JDK, MongoDB on `localhost:27017` or MongoDB Atlas Cloud connection
 - Account Service running on port `8081`
+
+### MongoDB Atlas Configuration
+```bash
+# Option A: Single cluster URI
+export MONGODB_ATLAS_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+
+# Option B: Dedicated driver service database URI
+export DRIVER_MONGODB_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/ridelink_driver_db?retryWrites=true&w=majority"
+```
 
 ```bash
 cd driver-service

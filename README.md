@@ -140,17 +140,52 @@ $$\text{Fare} = \max\left(\text{MinimumFare},\; \text{round}\left(\left(\text{Ba
 
 ### 5.1 Prerequisites
 - **JDK 21** or higher
-- **MongoDB 7.0+** running locally on default port `27017`
+- **MongoDB 7.0+** running locally on default port `27017` **OR** a free **MongoDB Atlas Cloud** cluster
 - **Git**
 
-### 5.2 Build & Run All Microservices
+### 5.2 Database Configuration (Local MongoDB vs. MongoDB Atlas Cloud)
+
+The RideLink platform adheres to the **Database-per-Service** pattern with 4 logically isolated databases:
+1. `ridelink_account_db` (Account Service)
+2. `ridelink_driver_db` (Driver & Vehicle Service)
+3. `ridelink_ride_db` (Ride Management Service)
+4. `ridelink_payment_db` (Fare & Payment Service)
+
+#### Using Local MongoDB (Default)
+By default, each service connects to `mongodb://localhost:27017/<database_name>`. No extra configuration is required.
+
+#### Using MongoDB Atlas Cloud (Recommended for Shared Deployment)
+You can connect all 4 services to your MongoDB Atlas cluster by setting environment variables without committing sensitive credentials to source control:
+
+**Option 1: Single Cluster URI (Auto-routes each service to its dedicated database)**
+```bash
+# Linux / macOS
+export MONGODB_ATLAS_URI="mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority"
+
+# Windows PowerShell
+$env:MONGODB_ATLAS_URI="mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority"
+
+# Windows CMD
+set MONGODB_ATLAS_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+```
+
+**Option 2: Dedicated Service-Specific URIs**
+```bash
+# Windows PowerShell
+$env:ACCOUNT_MONGODB_URI="mongodb+srv://<user>:<password>@cluster.mongodb.net/ridelink_account_db?retryWrites=true&w=majority"
+$env:DRIVER_MONGODB_URI="mongodb+srv://<user>:<password>@cluster.mongodb.net/ridelink_driver_db?retryWrites=true&w=majority"
+$env:RIDE_MONGODB_URI="mongodb+srv://<user>:<password>@cluster.mongodb.net/ridelink_ride_db?retryWrites=true&w=majority"
+$env:FARE_MONGODB_URI="mongodb+srv://<user>:<password>@cluster.mongodb.net/ridelink_payment_db?retryWrites=true&w=majority"
+```
+
+### 5.3 Build & Run All Microservices
 
 To compile and verify all services at once from the root directory:
 ```bash
 ./mvnw clean test
 ```
 
-### 5.3 Starting Services (Recommended Order)
+### 5.4 Starting Services (Recommended Order)
 
 Open 4 separate terminal windows or run each in the background:
 
