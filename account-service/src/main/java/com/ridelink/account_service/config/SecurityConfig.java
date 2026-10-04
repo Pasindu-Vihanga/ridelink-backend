@@ -36,7 +36,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/test/**",
+                                "/direct-test/**"
                         ).permitAll()
                         // Inter-service user validation endpoint
                         .requestMatchers(HttpMethod.GET, "/api/users/*/validate").permitAll()

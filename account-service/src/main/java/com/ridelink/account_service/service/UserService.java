@@ -28,29 +28,54 @@ public class UserService {
     private final JwtService jwtService;
 
     public UserResponse register(RegisterRequest request) {
-        String normalizedEmail = request.getEmail().toLowerCase().trim();
+        try {
+            String normalizedEmail = request.getEmail().toLowerCase().trim();
+            
+            System.out.println("🔍 REGISTER DEBUG: Starting registration for " + normalizedEmail);
 
-        if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new EmailAlreadyExistsException("Email already exists: " + request.getEmail());
+            if (userRepository.existsByEmail(normalizedEmail)) {
+                throw new EmailAlreadyExistsException("Email already exists: " + request.getEmail());
+            }
+
+            if (request.getRole() == Role.ADMIN) {
+                throw new BadRequestException("Self-registration as ADMIN is not permitted");
+            }
+
+            User user = User.builder()
+                    .fullName(request.getFullName().trim())
+                    .email(normalizedEmail)
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .phoneNumber(request.getPhoneNumber().trim())
+                    .role(request.getRole())
+                    .status(AccountStatus.ACTIVE)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+
+            System.out.println("💾 REGISTER DEBUG: About to save user to MongoDB");
+            User savedUser = userRepository.save(user);
+            
+            // CRITICAL: Verify the save operation succeeded
+            if (savedUser.getId() == null) {
+                throw new RuntimeException("❌ CRITICAL: User save failed - no ID generated");
+            }
+            
+            // Double-check by reading back from database
+            boolean exists = userRepository.existsById(savedUser.getId());
+            if (!exists) {
+                throw new RuntimeException("❌ CRITICAL: User save verification failed - not found in database");
+            }
+            
+            System.out.println("✅ REGISTER DEBUG: User saved successfully with ID: " + savedUser.getId());
+            System.out.println("📊 REGISTER DEBUG: Total users in database: " + userRepository.count());
+            
+            return UserResponse.fromUser(savedUser);
+            
+        } catch (Exception e) {
+            System.err.println("❌ REGISTER ERROR: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
         }
-
-        if (request.getRole() == Role.ADMIN) {
-            throw new BadRequestException("Self-registration as ADMIN is not permitted");
-        }
-
-        User user = User.builder()
-                .fullName(request.getFullName().trim())
-                .email(normalizedEmail)
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phoneNumber(request.getPhoneNumber().trim())
-                .role(request.getRole())
-                .status(AccountStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        User savedUser = userRepository.save(user);
-        return UserResponse.fromUser(savedUser);
     }
 
     public LoginResponse login(LoginRequest request) {
