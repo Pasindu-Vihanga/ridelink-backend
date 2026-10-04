@@ -39,8 +39,10 @@ public class TestController {
                     .driverId("sample-driver-id")
                     .pickupLocation(com.ridelink.ride_service.entity.LocationPoint.builder().address("Sample Pickup Location").build())
                     .dropoffLocation(com.ridelink.ride_service.entity.LocationPoint.builder().address("Sample Dropoff Location").build())
-                    .fareAmount(500.0)
+                    .status(com.ridelink.ride_service.entity.RideStatus.COMPLETED)
+                    .fareAmount(750.0)
                     .requestedAt(LocalDateTime.now())
+                    .completedAt(LocalDateTime.now())
                     .build();
 
             Ride saved = rideRepository.save(sampleRide);
