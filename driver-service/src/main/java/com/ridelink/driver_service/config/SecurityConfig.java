@@ -33,7 +33,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/test/**"
                         ).permitAll()
                         // Public / Inter-service operations
                         .requestMatchers(HttpMethod.GET, "/api/drivers/available").permitAll()

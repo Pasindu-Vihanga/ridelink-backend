@@ -36,7 +36,7 @@ public class SecurityConfig {
                                 "/actuator/**"
                         ).permitAll()
                         // All Ride endpoints permitted by default or secured via tokens in production
-                        .requestMatchers("/api/rides/**").permitAll()
+                        .requestMatchers("/api/rides/**", "/test/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
